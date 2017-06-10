@@ -21,7 +21,7 @@ exports.handleRequest = function (req, res) {
     }
   } else if (req.method === 'POST') {
      http.getRequestedURL(req, function(url) {
-      archive.addUrlToList(url);
+      archive.addUrlToList(url, function(){});
       http.writeResponse(res, '', 302);
      });
 

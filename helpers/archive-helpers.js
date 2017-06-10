@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var http = require('http')
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -30,35 +31,46 @@ exports.readListOfUrls = function(callback) {
     if (error) {
       console.error(error);
     } else {
-      callback(data);
+ //     console.log('=========', data.split('\n'));
+      callback(data.split('\n'));
     }
   });
 };
 
 exports.isUrlInList = function(url, callback) {
-  return this.readListOfUrls((data) => {
-    var arr = data.split('\n');
-    //console.log("=========>", arr);
-    arr.forEach( (item) => {
-      if(item === url) {
-        return true;
-      }
-    });
+  return this.readListOfUrls((dataArray) => {
+//    console.log("=========>", dataArray.includes(url));
+    callback(dataArray.includes(url));
   });
 };
 
 exports.addUrlToList = function(url, callback) {
-  if (!this.isUrlInList(url)) {
-    fs.appendFile(this.paths.list, url + '\n', 'utf8', (error) => {
+  callback(fs.appendFile(this.paths.list, url + '\n', 'utf8', (error) => {
       if (error) {
         console.error(error);
       }
     })
-  }
+  );
 };
 
 exports.isUrlArchived = function(url, callback) {
+  //archive.paths.archived + '/' + url
+  fs.readdir(this.paths.archivedSites + '/', (error, files) => {
+    if(error) {
+      console.error(error);
+    } else {
+      callback(files.includes(url));
+    }
+  });
 };
 
 exports.downloadUrls = function(urls) {
+  //for each url -- check if it's archived
+  // if not download to archive --put it in archives.sites
+  urls.forEach((url) => {
+    http.get('http://'+ url, (res) => {
+      var website = fs.createWriteStream(this.paths.archivedSites + '/' + url);
+      res.pipe(website);
+    });
+  });
 };

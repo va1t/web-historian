@@ -26,12 +26,35 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
+  fs.readFile(this.paths.list,'utf8', (error, data) => {
+    if (error) {
+      console.error(error);
+    } else {
+      callback(data);
+    }
+  });
 };
 
 exports.isUrlInList = function(url, callback) {
+  return this.readListOfUrls((data) => {
+    var arr = data.split('\n');
+    //console.log("=========>", arr);
+    arr.forEach( (item) => {
+      if(item === url) {
+        return true;
+      }
+    });
+  });
 };
 
 exports.addUrlToList = function(url, callback) {
+  if (!this.isUrlInList(url)) {
+    fs.appendFile(this.paths.list, url + '\n', 'utf8', (error) => {
+      if (error) {
+        console.error(error);
+      }
+    })
+  }
 };
 
 exports.isUrlArchived = function(url, callback) {
